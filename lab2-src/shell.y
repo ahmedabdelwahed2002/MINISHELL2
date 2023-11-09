@@ -13,7 +13,7 @@
 
 %token	<string_val> WORD
 
-%token 	NOTOKEN GREAT NEWLINE 
+%token 	NOTOKEN GREAT NEWLINE PIPE BACKGROUND EXIT 
 
 %union	{
 		char   *string_val;
@@ -48,6 +48,22 @@ simple_command:
 	command_and_args iomodifier_opt NEWLINE {
 		printf("   Yacc: Execute command\n");
 		Command::_currentCommand.execute();
+	}
+	| command_and_args iomodifier_opt PIPE commands {
+		printf("   Yacc: Execute command\n");
+		Command::_currentCommand.execute();
+	}
+	|
+		| command_and_args iomodifier_opt BACKGROUND NEWLINE {
+		printf("   Yacc: background inserted = TRUE\n");
+	 	Command::_currentCommand._background=1;
+		printf("   Yacc: Execute command\n");
+		Command::_currentCommand.execute();
+	}
+	|
+		EXIT NEWLINE{
+		printf("\n\t\t\t Good Bye! yn3al mayteen omak\n\n");
+		exit(0);
 	}
 	| NEWLINE 
 	| error NEWLINE { yyerrok; }
@@ -87,7 +103,7 @@ iomodifier_opt:
 		printf("   Yacc: insert output \"%s\"\n", $2);
 		Command::_currentCommand._outFile = $2;
 	}
-	| /* can be empty */ 
+	| 
 	;
 
 %%

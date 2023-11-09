@@ -16,7 +16,7 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <signal.h>
-
+#include <fcntl.h>
 #include "command.h"
 
 SimpleCommand::SimpleCommand()
@@ -138,18 +138,55 @@ Command::execute()
 		prompt();
 		return;
 	}
-	
+	printf("AHMAAA number of simple commands: %d\n", _numberOfSimpleCommands);
 	// Print contents of Command data structure
 	print();
-
+	int defaultInput = dup(0);
+	int defaultOutput = dup(1);
+	int ip, op, err;
+	int foo = 0;
+	//#################  llta2keed w omoor el debug ####################
+	for(int j = 0; j < _numberOfSimpleCommands; j++){
+		for(int i = 0; i < _simpleCommands[j]->_numberOfArguments; i++){
+			printf("AHMAAA simple command %d argument %d: %s\n", j, i, _simpleCommands[j]->_arguments[i]);
+		}
+	}
+	//##################################################################
 	// Add execution here
+	while (foo < _numberOfSimpleCommands){
+	int pid = fork();
+	if (pid == -1)
+	{
+		perror("fork");
+		exit(2);
+	}
+
+	else if (pid == 0)
+	{
+		printf("Child process\n");
+		printf("foo: %d\n", foo) ; 
+		printf("el3ayzeeno %s \n", _simpleCommands[foo]->_arguments[0]);
+		execvp(_simpleCommands[foo]->_arguments[0], _simpleCommands[foo]->_arguments);
+		printf("execvp failed\n");
+		
+	}
+		else
+	{
+	
+		if (!_background)
+		waitpid( pid, 0, 0 );
+		foo++;
+		printf("Parent process\n");
+	}
+	}
+
 	// For every simple command fork a new process
 	// Setup i/o redirection
 	// and call exec
 
 	// Clear to prepare for next command
 	clear();
-	
+
 	// Print new prompt
 	prompt();
 }
